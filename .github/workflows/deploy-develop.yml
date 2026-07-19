@@ -1,0 +1,57 @@
+name: Deploy Develop
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-develop
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+  security-events: write
+
+jobs:
+  deploy-develop:
+    name: 🚀 Deploy Develop
+    uses: dev-sec-ops-sharing/devsecops-infra/.github/workflows/build-deploy.yml@main
+    with:
+      service-name: portal-fe-develop
+      env-vars: 'API_URL=${{ secrets.API_URL }}'
+      environment: 'develop'
+    secrets:
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GOOGLE_CHAT_WEBHOOK: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+
+  trigger-e2e:
+    name: 🎭 Trigger Smoke Test
+    needs: [deploy-develop]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger E2E Tests Repo Dispatch
+        run: |
+          if [ -n "${{ secrets.E2E_PAT_TOKEN }}" ]; then
+            SERVICE_URL="${{ needs.deploy-develop.outputs.service-url }}"
+            echo "Triggering Smoke E2E tests for target: $SERVICE_URL"
+            curl -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.E2E_PAT_TOKEN }}" \
+              https://api.github.com/repos/${{ github.repository_owner }}/e2e-tests/dispatches \
+              -d "{\"event_type\": \"trigger-e2e\", \"client_payload\": {\"target-url\": \"$SERVICE_URL\"}}"
+          else
+            echo "E2E_PAT_TOKEN is not set. Skipping E2E trigger."
+          fi
+        env:
+          E2E_PAT_TOKEN: ${{ secrets.E2E_PAT_TOKEN }}
+
+  dast:
+    name: 🌐 DAST Scan (Develop)
+    needs: [deploy-develop]
+    uses: dev-sec-ops-sharing/devsecops-infra/.github/workflows/dast-scan.yml@main
+    with:
+      target-url: ${{ needs.deploy-develop.outputs.service-url }}
+    secrets:
+      GOOGLE_CHAT_WEBHOOK: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}

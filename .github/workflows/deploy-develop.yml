@@ -19,13 +19,13 @@ jobs:
     uses: dev-sec-ops-sharing/devsecops-infra/.github/workflows/build-deploy.yml@main
     with:
       service-name: portal-fe-develop
-      env-vars: 'API_URL=${{ secrets.API_URL }}'
       environment: 'develop'
     secrets:
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       GOOGLE_CHAT_WEBHOOK: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}
+      API_URL: ${{ secrets.API_URL }}
 
   trigger-e2e:
     name: 🎭 Trigger Smoke Test

@@ -2,6 +2,7 @@
 FROM node:20-alpine AS builder
 
 WORKDIR /app
+RUN mkdir -p public
 
 # Cache dependencies
 COPY package*.json ./

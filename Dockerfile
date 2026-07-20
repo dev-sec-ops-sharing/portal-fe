@@ -1,6 +1,9 @@
 # ============ BUILD STAGE ============
 FROM node:20-alpine AS builder
 
+RUN apk update && apk upgrade --no-cache
+
+
 WORKDIR /app
 
 # Cache dependencies
@@ -13,6 +16,9 @@ RUN npm run build
 
 # ============ PRODUCTION STAGE ============
 FROM node:20-alpine AS runner
+
+RUN apk update && apk upgrade --no-cache
+
 
 WORKDIR /app
 ENV NODE_ENV=production

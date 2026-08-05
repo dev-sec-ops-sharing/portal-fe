@@ -18,6 +18,12 @@ export default function Home() {
           >
             Manage Invoices
           </Link>
+          <Link 
+            href="/transactions"
+            className="rounded-full bg-slate-800 px-8 py-4 text-white font-semibold hover:bg-slate-900 transition-colors shadow-lg hover:shadow-xl"
+          >
+            View Transactions
+          </Link>
           <a
             href="https://github.com"
             target="_blank"

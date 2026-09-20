@@ -1,5 +1,5 @@
 # ============ BUILD STAGE ============
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 WORKDIR /app
 RUN mkdir -p public
@@ -13,7 +13,7 @@ COPY . .
 RUN npm run build
 
 # ============ PRODUCTION STAGE ============
-FROM node:20-alpine AS runner
+FROM node:25-alpine AS runner
 
 WORKDIR /app
 ENV NODE_ENV=production
